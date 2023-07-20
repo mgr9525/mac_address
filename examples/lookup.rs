@@ -14,11 +14,15 @@ fn main() {
     let name = "Ethernet";
 
     match mac_address_by_name(name) {
-        Ok(Some(ma)) => {
-            println!("MAC addr of {} = {}", name, ma);
-            println!("bytes = {:?}", ma.bytes());
+        Ok(ls) => {
+            if ls.len() <= 0 {
+                println!("Interface \"{}\" not found", name);
+            }
+            for ma in &ls {
+                println!("MAC addr of {} = {}", name, ma);
+                println!("bytes = {:?}", ma.bytes());
+            }
         }
-        Ok(None) => println!("Interface \"{}\" not found", name),
         Err(e) => println!("{:?}", e),
     }
 }
