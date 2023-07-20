@@ -106,19 +106,26 @@ impl serde::Serialize for MacAddress {
 
 /// Calls the OS-specific function for retrieving the MAC address of the first
 /// network device containing one, ignoring local-loopback.
-pub fn get_mac_address() -> Result<Option<MacAddress>, MacAddressError> {
+pub fn get_mac_address() -> Result<Vec<MacAddress>, MacAddressError> {
     let bytes = os::get_mac(None)?;
-
-    Ok(bytes.map(|b| MacAddress { bytes: b }))
+    let mut rts = Vec::new();
+    for b in bytes {
+        rts.push(MacAddress { bytes: b });
+    }
+    Ok(rts)
 }
 
 /// Attempts to look up the MAC address of an interface via the specified name.
 /// **NOTE**: On Windows, this uses the `FriendlyName` field of the adapter, which
 /// is the same name shown in the "Network Connections" Control Panel screen.
-pub fn mac_address_by_name(name: &str) -> Result<Option<MacAddress>, MacAddressError> {
+pub fn mac_address_by_name(name: &str) -> Result<Vec<MacAddress>, MacAddressError> {
     let bytes = os::get_mac(Some(name))?;
+    let mut rts = Vec::new();
+    for b in bytes {
+        rts.push(MacAddress { bytes: b });
+    }
 
-    Ok(bytes.map(|b| MacAddress { bytes: b }))
+    Ok(rts)
 }
 
 /// Attempts to look up the interface name via MAC address.

@@ -14,11 +14,12 @@ const GAA_FLAG_NONE: ULONG = 0x0000;
 /// address, and returns it.
 ///
 /// If it fails to find a device, it returns a `NoDevicesFound` error.
-pub fn get_mac(name: Option<&str>) -> Result<Option<[u8; 6]>, MacAddressError> {
+pub fn get_mac(name: Option<&str>) -> Result<Vec<[u8; 6]>, MacAddressError> {
     let adapters = get_adapters()?;
     // Safety: We don't use the pointer after `adapters` is dropped
     let mut ptr = unsafe { adapters.ptr() };
 
+    let mut rts = Vec::new();
     loop {
         // Break if we've gone through all devices
         if ptr.is_null() {
@@ -35,10 +36,13 @@ pub fn get_mac(name: Option<&str>) -> Result<Option<[u8; 6]>, MacAddressError> {
             let adapter_name = unsafe { construct_string(ptr.read_unaligned().FriendlyName) };
 
             if adapter_name == name {
-                return Ok(Some(bytes));
+                // return Ok(Some(bytes));
+                // return Ok(vec![bytes]);
+                rts.push(bytes);
             }
         } else if bytes.iter().any(|&x| x != 0) {
-            return Ok(Some(bytes));
+            // return Ok(Some(bytes));
+                rts.push(bytes);
         }
 
         // Otherwise go to the next device
@@ -53,7 +57,7 @@ pub fn get_mac(name: Option<&str>) -> Result<Option<[u8; 6]>, MacAddressError> {
         }
     }
 
-    Ok(None)
+    Ok(rts)
 }
 
 pub fn get_ifname(mac: &[u8; 6]) -> Result<Option<String>, MacAddressError> {
